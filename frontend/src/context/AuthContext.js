@@ -4,22 +4,21 @@ function AuthProvider({ children }) {
   const [user, setUser] = React.useState(
     JSON.parse(localStorage.getItem("user")) || null
   );
-  const [token, setToken] = React.useState(localStorage.getItem("token") || null);
+  const [token, setToken] = React.useState(
+    localStorage.getItem("token") || null
+  );
 
-  const login = (userData, jwtToken) => {
+  const login = (userData, jwt) => {
     setUser(userData);
-    setToken(jwtToken);
-
+    setToken(jwt);
     localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", jwtToken);
+    localStorage.setItem("token", jwt);
   };
 
   const logout = () => {
+    localStorage.clear();
     setUser(null);
     setToken(null);
-
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
   };
 
   return (
