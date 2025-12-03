@@ -8,49 +8,45 @@ export default function LoginPage() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
 
-  const handleLogin = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const res = await api.post("/auth/login", { email, password });
       login(res.data.user, res.data.token);
-      alert("Login successful!");
+      window.location.href = "/dashboard";
     } catch (err) {
       setError("Invalid email or password");
     }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="container mt-5" style={{ maxWidth: "400px" }}>
       <h2>Login</h2>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <div className="alert alert-danger">{error}</div>}
 
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email:</label><br />
-          <input
-            type="text"
+      <form onSubmit={submit}>
+        <div className="mb-3">
+          <label>Email</label>
+          <input className="form-control"
             value={email}
+            onChange={e => setEmail(e.target.value)}
             placeholder="admin@example.com"
-            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <div style={{ marginTop: "10px" }}>
-          <label>Password:</label><br />
-          <input
-            type="password"
+        <div className="mb-3">
+          <label>Password</label>
+          <input className="form-control" type="password"
             value={password}
+            onChange={e => setPassword(e.target.value)}
             placeholder="password"
-            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
-        <button style={{ marginTop: "15px" }} type="submit">
-          Login
-        </button>
+        <button className="btn btn-primary w-100">Login</button>
       </form>
     </div>
   );
