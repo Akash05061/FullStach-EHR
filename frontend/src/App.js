@@ -1,11 +1,11 @@
+import Navbar from "./components/Navbar.js";
+import ProtectedRoute from "./components/ProtectedRoute.js";
+
 import LoginPage from "./pages/LoginPage.js";
 import Dashboard from "./pages/Dashboard.js";
 import PatientSearch from "./pages/PatientSearch.js";
 import PatientProfile from "./pages/PatientProfile.js";
 import PatientForm from "./pages/PatientForm.js";
-
-import Navbar from "./components/Navbar.js";
-import ProtectedRoute from "./components/ProtectedRoute.js";
 
 import { AuthProvider } from "./context/AuthContext.js";
 
@@ -17,7 +17,6 @@ export default function App() {
       <Navbar />
 
       <Routes>
-        {/* Default route */}
         <Route path="/" element={<Navigate to="/login" />} />
 
         {/* Public */}
