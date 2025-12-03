@@ -3,7 +3,6 @@ import { AuthContext } from "../context/AuthContext.js";
 export default function Navbar() {
   const { user, logout, token } = React.useContext(AuthContext);
 
-  // Hide navbar if not logged in
   if (!token) return null;
 
   const handleLogout = () => {
@@ -12,52 +11,30 @@ export default function Navbar() {
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        padding: "12px 20px",
-        background: "#1976d2",
-        color: "white",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "20px"
-      }}
-    >
-      {/* Left side links */}
-      <div>
-        <a href="/dashboard" style={{ color: "white", marginRight: "20px" }}>
-          Dashboard
-        </a>
-        <a href="/patients" style={{ color: "white", marginRight: "20px" }}>
-          Patients
-        </a>
-        <a href="/patients/new" style={{ color: "white" }}>
-          Add Patient
-        </a>
-      </div>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-3">
+      <a className="navbar-brand" href="/dashboard">EHR System</a>
 
-      {/* Right side user + logout */}
-      <div>
-        <span style={{ marginRight: "20px" }}>
-          Logged in as <strong>{user?.name}</strong>
+      <button
+        className="navbar-toggler"
+        data-bs-toggle="collapse"
+        data-bs-target="#nav"
+      >
+        <span className="navbar-toggler-icon"></span>
+      </button>
+
+      <div id="nav" className="collapse navbar-collapse">
+        <ul className="navbar-nav me-auto">
+          <li className="nav-item"><a className="nav-link" href="/dashboard">Dashboard</a></li>
+          <li className="nav-item"><a className="nav-link" href="/patients">Patients</a></li>
+          <li className="nav-item"><a className="nav-link" href="/patients/new">Add Patient</a></li>
+        </ul>
+
+        <span className="navbar-text me-3">
+          {user?.name}
         </span>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: "6px 12px",
-            background: "white",
-            color: "#1976d2",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontWeight: "bold"
-          }}
-        >
-          Logout
-        </button>
+        <button className="btn btn-light" onClick={handleLogout}>Logout</button>
       </div>
-    </div>
+    </nav>
   );
 }
