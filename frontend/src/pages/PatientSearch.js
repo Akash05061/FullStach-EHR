@@ -4,26 +4,36 @@ export default function PatientSearch() {
   const [patients, setPatients] = React.useState([]);
 
   React.useEffect(() => {
-    api.get("/patients")
-      .then((res) => setPatients(res.data))
-      .catch((err) => console.log(err));
+    api.get("/patients").then(res => setPatients(res.data));
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="container mt-4">
       <h2>Patients</h2>
 
-      {patients.length === 0 && <p>No patients yet.</p>}
+      <table className="table table-bordered mt-3">
+        <thead className="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Condition</th>
+            <th>View</th>
+          </tr>
+        </thead>
 
-      <ul>
-        {patients.map((p) => (
-          <li key={p.id} style={{ marginBottom: "10px" }}>
-            <a href={`/patients/${p.id}`}>
-              {p.name} — {p.condition}
-            </a>
-          </li>
-        ))}
-      </ul>
+        <tbody>
+          {patients.map(p => (
+            <tr key={p.id}>
+              <td>{p.name}</td>
+              <td>{p.condition}</td>
+              <td>
+                <a className="btn btn-primary btn-sm" href={`/patients/${p.id}`}>
+                  View
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -1,33 +1,30 @@
 import api from "../api/axios.js";
+const { useParams } = ReactRouterDOM;
 
 export default function PatientProfile() {
-  const params = ReactRouterDOM.useParams();
-  const patientId = params.id;
-
+  const { id } = useParams();
   const [patient, setPatient] = React.useState(null);
 
   React.useEffect(() => {
-    api.get(`/patients/${patientId}`)
-      .then((res) => setPatient(res.data))
-      .catch((err) => console.log(err));
-  }, [patientId]);
+    api.get(`/patients/${id}`).then(res => setPatient(res.data));
+  }, []);
 
-  if (!patient) return <p style={{ padding: "20px" }}>Loading...</p>;
+  if (!patient) return <p>Loading...</p>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Patient Profile</h2>
+    <div className="container mt-4">
+      <h2>Patient Details</h2>
 
-      <p><strong>Name:</strong> {patient.name}</p>
-      <p><strong>Age:</strong> {patient.age}</p>
-      <p><strong>Gender:</strong> {patient.gender}</p>
-      <p><strong>Condition:</strong> {patient.condition}</p>
-      <p><strong>Phone:</strong> {patient.phone}</p>
-      <p><strong>Address:</strong> {patient.address}</p>
+      <ul className="list-group mt-3">
+        <li className="list-group-item"><strong>Name:</strong> {patient.name}</li>
+        <li className="list-group-item"><strong>Age:</strong> {patient.age}</li>
+        <li className="list-group-item"><strong>Gender:</strong> {patient.gender}</li>
+        <li className="list-group-item"><strong>Condition:</strong> {patient.condition}</li>
+        <li className="list-group-item"><strong>Phone:</strong> {patient.phone}</li>
+        <li className="list-group-item"><strong>Address:</strong> {patient.address}</li>
+      </ul>
 
-      <br />
-
-      <a href="/patients">⬅ Back to Patients</a>
+      <a href="/patients" className="btn btn-secondary mt-3">Back</a>
     </div>
   );
 }
