@@ -4,14 +4,18 @@ import PatientSearch from "./pages/PatientSearch.js";
 import PatientProfile from "./pages/PatientProfile.js";
 import PatientForm from "./pages/PatientForm.js";
 
-import { AuthProvider } from "./context/AuthContext.js";
+import Navbar from "./components/Navbar.js";
 import ProtectedRoute from "./components/ProtectedRoute.js";
+
+import { AuthProvider } from "./context/AuthContext.js";
 
 const { Routes, Route, Navigate } = ReactRouterDOM;
 
 export default function App() {
   return (
     <AuthProvider>
+      <Navbar />
+
       <Routes>
         {/* Default route */}
         <Route path="/" element={<Navigate to="/login" />} />
