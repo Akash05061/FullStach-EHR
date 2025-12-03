@@ -3,24 +3,59 @@ import Dashboard from "./pages/Dashboard.js";
 import PatientSearch from "./pages/PatientSearch.js";
 import PatientProfile from "./pages/PatientProfile.js";
 import PatientForm from "./pages/PatientForm.js";
+
 import { AuthProvider } from "./context/AuthContext.js";
+import ProtectedRoute from "./components/ProtectedRoute.js";
 
 const { Routes, Route, Navigate } = ReactRouterDOM;
 
-function App() {
+export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Default route */}
         <Route path="/" element={<Navigate to="/login" />} />
 
+        {/* Public */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/patients" element={<PatientSearch />} />
-        <Route path="/patients/new" element={<PatientForm />} />
-        <Route path="/patients/:id" element={<PatientProfile />} />
+
+        {/* Protected */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/patients"
+          element={
+            <ProtectedRoute>
+              <PatientSearch />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/patients/new"
+          element={
+            <ProtectedRoute>
+              <PatientForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/patients/:id"
+          element={
+            <ProtectedRoute>
+              <PatientProfile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </AuthProvider>
   );
 }
-
-export default App;
