@@ -1,81 +1,33 @@
-// src/context/AuthContext.js
+import React, { createContext, useContext, useState } from 'react';
+import axios from 'axios';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../api/api';
+const AuthContext = createContext();
 
-const AuthContext = createContext(null);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // --------------------
-  // Load auth from storage
-  // --------------------
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-
-    if (token && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
-
-  // --------------------
-  // Login
-  // --------------------
   const login = async (credentials) => {
     try {
-      const response = await authAPI.login(credentials);
-      const { token, user } = response.data;
+      const res = await axios.post(
+        'http://43.205.232.223:3001/api/auth/login',
+        credentials
+      );
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-
+      setUser(res.data.user);
       return { success: true };
-    } catch (error) {
+    } catch (err) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: err.response?.data?.error || 'Login failed'
       };
     }
   };
 
-  // --------------------
-  // Logout
-  // --------------------
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    window.location.href = '/login';
-  };
-
-  const value = {
-    user,
-    login,
-    logout,
-    loading
-  };
-
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login }}>
+      {children}
     </AuthContext.Provider>
   );
 };
