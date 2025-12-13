@@ -1,40 +1,56 @@
-import { AuthContext } from "../context/AuthContext.js";
+// src/components/Navbar.js
 
-export default function Navbar() {
-  const { user, logout, token } = React.useContext(AuthContext);
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-  if (!token) return null;
+const Navbar = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    window.location.href = "/login";
+    navigate('/login');
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-3">
-      <a className="navbar-brand" href="/dashboard">EHR System</a>
-
-      <button
-        className="navbar-toggler"
-        data-bs-toggle="collapse"
-        data-bs-target="#nav"
-      >
-        <span className="navbar-toggler-icon"></span>
-      </button>
-
-      <div id="nav" className="collapse navbar-collapse">
-        <ul className="navbar-nav me-auto">
-          <li className="nav-item"><a className="nav-link" href="/dashboard">Dashboard</a></li>
-          <li className="nav-item"><a className="nav-link" href="/patients">Patients</a></li>
-          <li className="nav-item"><a className="nav-link" href="/patients/new">Add Patient</a></li>
-        </ul>
-
-        <span className="navbar-text me-3">
-          {user?.name}
-        </span>
-
-        <button className="btn btn-light" onClick={handleLogout}>Logout</button>
+    <nav className="navbar">
+      <div className="navbar-brand">
+        <Link to="/" className="nav-link">
+          EHR System
+        </Link>
       </div>
+
+      {user ? (
+        <div className="navbar-links">
+          <Link to="/dashboard" className="nav-link">
+            Dashboard
+          </Link>
+
+          <Link to="/patients" className="nav-link">
+            Patients
+          </Link>
+
+          <Link to="/patients/new" className="nav-link">
+            Add Patient
+          </Link>
+
+          <div className="nav-user">
+            <span>Welcome, {user.name}</span>
+            <button onClick={handleLogout} className="btn btn-danger">
+              Logout
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="navbar-links">
+          <Link to="/login" className="nav-link">
+            Login
+          </Link>
+        </div>
+      )}
     </nav>
   );
-}
+};
+
+export default Navbar;
