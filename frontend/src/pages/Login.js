@@ -1,4 +1,3 @@
-// src/pages/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -23,26 +22,31 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // 🔴 CRITICAL FIX
     setLoading(true);
     setError('');
 
     const result = await login(credentials);
+
     setLoading(false);
 
     if (result.success) {
       navigate('/dashboard');
     } else {
-      setError(result.error);
+      setError(result.error || 'Login failed');
     }
   };
 
   return (
     <div className="container">
       <div className="card" style={{ maxWidth: '400px', margin: '2rem auto' }}>
-        <h2 style={{ textAlign: 'center' }}>Login to EHR System</h2>
+        <h2>Login</h2>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <div className="alert alert-error">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -53,7 +57,6 @@ const Login = () => {
               value={credentials.username}
               onChange={handleChange}
               className="form-input"
-              placeholder="Enter username"
               required
             />
           </div>
@@ -66,13 +69,12 @@ const Login = () => {
               value={credentials.password}
               onChange={handleChange}
               className="form-input"
-              placeholder="Enter password"
               required
             />
           </div>
 
           <button
-            type="submit"
+            type="submit"   // 🔴 CRITICAL FIX
             className="btn btn-primary"
             disabled={loading}
             style={{ width: '100%', marginTop: '1rem' }}
@@ -82,9 +84,7 @@ const Login = () => {
         </form>
 
         <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-          <small>
-            Demo credentials: <b>admin / admin123</b>
-          </small>
+          <p><strong>Demo:</strong> admin / admin123</p>
         </div>
       </div>
     </div>
