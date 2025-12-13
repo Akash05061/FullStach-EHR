@@ -1,40 +1,69 @@
-// Dummy Users (for login)
-export const users = [
+// data/db.js
+
+// --------------------
+// Users (Dummy Auth)
+// --------------------
+const users = [
   {
     id: 1,
-    email: "admin@example.com",
-    password: "password", // plain text (as requested)
-    name: "Admin User"
+    email: 'admin@example.com',
+    password: 'password', // ✅ plain text (as required)
+    role: 'admin',
+    name: 'Admin User',
+    createdAt: new Date().toISOString()
   }
 ];
 
-// Dummy Patients (in-memory DB)
-export const patients = [
+// --------------------
+// Patients (Dummy Data)
+// --------------------
+const patients = [
   {
     id: 1,
-    name: "John Doe",
+    name: 'John Doe',
     age: 32,
-    gender: "Male",
-    condition: "Diabetes Type 2",
-    phone: "9876543210",
-    address: "123 MG Road, Bangalore"
+    gender: 'Male',
+    condition: 'Diabetes Type 2',
+    phone: '9876543210',
+    address: 'Bangalore'
   },
   {
     id: 2,
-    name: "Asha Rani",
+    name: 'Asha Rani',
     age: 27,
-    gender: "Female",
-    condition: "Hypertension",
-    phone: "9988776655",
-    address: "Jayanagar, Bangalore"
-  },
-  {
-    id: 3,
-    name: "Vikram Shetty",
-    age: 45,
-    gender: "Male",
-    condition: "Asthma",
-    phone: "9123456789",
-    address: "Indiranagar, Bangalore"
+    gender: 'Female',
+    condition: 'Hypertension',
+    phone: '9988776655',
+    address: 'Mysore'
   }
 ];
+
+// --------------------
+// Future placeholders
+// --------------------
+const appointments = [];
+const prescriptions = [];
+const labResults = [];
+const medicalFiles = [];
+
+// --------------------
+// ID generator
+// --------------------
+const nextId = {
+  users: users.length + 1,
+  patients: patients.length + 1,
+  appointments: 1,
+  prescriptions: 1,
+  labResults: 1,
+  medicalFiles: 1
+};
+
+module.exports = {
+  users,
+  patients,
+  appointments,
+  prescriptions,
+  labResults,
+  medicalFiles,
+  nextId
+};
