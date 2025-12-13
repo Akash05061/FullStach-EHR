@@ -1,16 +1,21 @@
-import express from "express";
-import {
-  getPatients,
-  getPatientById,
-  createPatient
-} from "../controllers/patientController.js";
+// routes/patientRoutes.js
 
-import { authMiddleware } from "../middleware/authMiddleware.js";
-
+const express = require('express');
 const router = express.Router();
 
-router.get("/", authMiddleware, getPatients);
-router.get("/:id", authMiddleware, getPatientById);
-router.post("/", authMiddleware, createPatient);
+const { authenticateToken } = require('../middleware/authMiddleware');
+const {
+  getAllPatients,
+  getPatientById,
+  createPatient
+} = require('../controllers/patientController');
 
-export default router;
+// --------------------
+// PATIENT ROUTES
+// --------------------
+
+router.get('/', authenticateToken, getAllPatients);
+router.get('/:id', authenticateToken, getPatientById);
+router.post('/', authenticateToken, createPatient);
+
+module.exports = router;
