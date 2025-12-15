@@ -1,21 +1,32 @@
 import axios from 'axios';
 
-// Create axios instance
 const api = axios.create({
-  baseURL: 'http://13.201.62.170:3001/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: 'http://13.201.62.170:3001/api'
 });
 
-// -------- AUTH ----------
-export const authAPI = {
-  login: (data) => api.post('/auth/login', data),
-};
+// ✅ Attach JWT automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-// -------- PATIENTS ----------
+/* -------------------------
+   PATIENTS API
+------------------------- */
 export const patientsAPI = {
   getAll: () => api.get('/patients'),
+  getById: (id) => api.get(`/patients/${id}`),
+  create: (data) => api.post('/patients', data)
+};
+
+/* -------------------------
+   DASHBOARD API (optional)
+------------------------- */
+export const dashboardAPI = {
+  overview: () => api.get('/patients') // reuse patients for count
 };
 
 export default api;
