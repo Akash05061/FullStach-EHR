@@ -34,28 +34,35 @@ const getPatientById = (req, res) => {
 };
 
 // --------------------
-// CREATE PATIENT
+// CREATE PATIENT  ✅ FIXED
 // --------------------
 const createPatient = (req, res) => {
   try {
-    const { name, age, gender, condition, phone, address } = req.body;
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      gender,
+      phone,
+      email
+    } = req.body;
 
-    if (!name || !age || !gender || !phone) {
+    // ✅ Match frontend validation
+    if (!firstName || !lastName || !dateOfBirth || !gender || !phone) {
       return res.status(400).json({
-        message: 'Required fields: name, age, gender, phone'
+        message: 'Required fields are missing'
       });
     }
 
     const newPatient = {
       id: nextId.patients++,
-      name,
-      age,
+      firstName,
+      lastName,
+      dateOfBirth,
       gender,
-      condition: condition || '',
       phone,
-      address: address || '',
-      createdAt: new Date().toISOString(),
-      createdBy: req.user.id
+      email: email || '',
+      createdAt: new Date().toISOString()
     };
 
     patients.push(newPatient);
