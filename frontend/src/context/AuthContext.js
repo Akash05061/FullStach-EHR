@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const res = await axios.post(
-        'http://13.201.62.170:3001/api/auth/login',
+        'http://13.201.16.7:3001/api/auth/login',
         credentials
       );
 
