@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -6,28 +6,18 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem('user')) || null
+  );
 
-  // ✅ Load user from localStorage on refresh
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
-  }, []);
-
-  // ✅ LOGIN
   const login = async (credentials) => {
     try {
       const res = await axios.post(
         'http://13.201.62.170:3001/api/auth/login',
-        credentials,
-        { headers: { 'Content-Type': 'application/json' } }
+        credentials
       );
 
-      // 🔴 CRITICAL FIXES
+      // ✅ STORE TOKEN & USER
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
@@ -41,16 +31,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ LOGOUT
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    window.location.href = '/login';
+  };
+
+  // ✅ Role helper
+  const hasRole = (roles = []) => {
+    if (!user) return false;
+    if (!Array.isArray(roles)) return false;
+    return roles.includes(user.role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );
