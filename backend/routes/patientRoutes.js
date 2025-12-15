@@ -1,21 +1,29 @@
-// routes/patientRoutes.js
-
 const express = require('express');
 const router = express.Router();
+const { patients, getNextPatientId } = require('../data/db');
 
-const { authenticateToken } = require('../middleware/authMiddleware');
-const {
-  getAllPatients,
-  getPatientById,
-  createPatient
-} = require('../controllers/patientController');
+// GET all patients
+router.get('/', (req, res) => {
+  res.json({
+    patients,
+    total: patients.length
+  });
+});
 
-// --------------------
-// PATIENT ROUTES
-// --------------------
+// CREATE patient
+router.post('/', (req, res) => {
+  const patient = {
+    id: getNextPatientId(),
+    ...req.body,
+    createdAt: new Date().toISOString()
+  };
 
-router.get('/', authenticateToken, getAllPatients);
-router.get('/:id', authenticateToken, getPatientById);
-router.post('/', authenticateToken, createPatient);
+  patients.push(patient);
+
+  res.status(201).json({
+    message: 'Patient created successfully',
+    patient
+  });
+});
 
 module.exports = router;
