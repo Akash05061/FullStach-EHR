@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
 
       const res = await axios.post(
-        'http://13.233.120.140:3001/api/auth/login',
+        'http://143.205.115.134:3001/api/auth/login',
         credentials,
         {
           headers: {
