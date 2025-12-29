@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
   // --------------------
   // ROLE CHECK
-  // --------------------
+  // -------------------- 
   const hasRole = (roles = []) => {
     if (!user) return false;
     if (!Array.isArray(roles)) return false;
