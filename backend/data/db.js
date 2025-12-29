@@ -1,8 +1,5 @@
 // backend/data/db.js
 
-// --------------------
-// USERS
-// --------------------
 const users = [
   {
     id: 1,
@@ -13,9 +10,6 @@ const users = [
   }
 ];
 
-// --------------------
-// PATIENTS
-// --------------------
 const patients = [
   {
     id: 1,
@@ -24,7 +18,8 @@ const patients = [
     dateOfBirth: '1990-05-12',
     gender: 'Male',
     phone: '9876543210',
-    email: 'ramesh@gmail.com'
+    email: 'ramesh@gmail.com',
+    createdAt: new Date().toISOString()
   },
   {
     id: 2,
@@ -33,7 +28,8 @@ const patients = [
     dateOfBirth: '1988-09-22',
     gender: 'Female',
     phone: '9988776655',
-    email: 'sita@gmail.com'
+    email: 'sita@gmail.com',
+    createdAt: new Date().toISOString()
   }
 ];
 
