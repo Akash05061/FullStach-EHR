@@ -1,7 +1,7 @@
 // src/pages/Dashboard.js
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { patientsAPI } from '../api/api';
+import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
@@ -13,25 +13,25 @@ const Dashboard = () => {
     recentPatients: []
   });
 
-  const fetchDashboardData = useCallback(async () => {
-    try {
-      const response = await patientsAPI.getAll({ page: 1, limit: 5 });
-
-      setStats({
-        totalPatients: response.data?.total ?? 0,
-        recentPatients: response.data?.patients ?? []
-      });
-    } catch (err) {
-      console.error('Dashboard fetch error:', err);
-      setError('Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const res = await api.get('/patients/dashboard/summary');
+
+        setStats({
+          totalPatients: res.data.totalPatients,
+          recentPatients: res.data.recentPatients
+        });
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchDashboardData();
-  }, [fetchDashboardData]);
+  }, []);
 
   if (loading) {
     return (
@@ -44,7 +44,9 @@ const Dashboard = () => {
   return (
     <div className="container">
       <h1>Dashboard</h1>
-      <p>Welcome back, <strong>{user?.firstName}</strong> 👋</p>
+      <p>
+        Welcome back, <strong>{user?.name || 'User'}</strong> 👋
+      </p>
 
       {error && <div className="alert alert-error">{error}</div>}
 
