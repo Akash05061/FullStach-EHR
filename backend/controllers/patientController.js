@@ -16,32 +16,37 @@ const getPatientById = (req, res) => {
 };
 
 const createPatient = (req, res) => {
-  const {
-    firstName,
-    lastName,
-    dateOfBirth,
-    gender,
-    phone,
-    email
-  } = req.body;
+  try {
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      gender,
+      phone,
+      email
+    } = req.body;
 
-  if (!firstName || !lastName || !dateOfBirth || !gender || !phone) {
-    return res.status(400).json({ message: 'Missing required fields' });
+    if (!firstName || !lastName || !dateOfBirth || !gender || !phone) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const patient = {
+      id: getNextPatientId(),
+      firstName,
+      lastName,
+      dateOfBirth,
+      gender,
+      phone,
+      email: email || '',
+      createdAt: new Date().toISOString()
+    };
+
+    patients.push(patient);
+
+    res.status(201).json(patient);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to create patient' });
   }
-
-  const patient = {
-    id: getNextPatientId(),
-    firstName,
-    lastName,
-    dateOfBirth,
-    gender,
-    phone,
-    email: email || ''
-  };
-
-  patients.push(patient);
-
-  res.status(201).json(patient);
 };
 
 module.exports = {
