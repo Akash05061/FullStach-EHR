@@ -1,58 +1,84 @@
 // src/pages/PatientList.js
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { patientsAPI } from '../api/api';
+import { patientsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+
+const PAGE_SIZE = 10;
 
 const PatientList = () => {
   const { hasRole } = useAuth();
 
+  const [allPatients, setAllPatients] = useState([]);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchPatients = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await patientsAPI.getAll({
-        page,
-        limit: 10,
-        search: searchTerm
-      });
-
-      setPatients(response.data?.patients ?? []);
-      setTotalPages(response.data?.totalPages ?? 1);
-    } catch (err) {
-      console.error('Fetch patients error:', err);
-      setError('Failed to load patients');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, searchTerm]);
-
+  // -------------------------
+  // FETCH PATIENTS
+  // -------------------------
   useEffect(() => {
-    fetchPatients();
-  }, [fetchPatients]);
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(1);
-  };
+        const res = await patientsAPI.getAll();
+        setAllPatients(res.data);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load patients');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
+  // -------------------------
+  // SEARCH + PAGINATION
+  // -------------------------
+  useEffect(() => {
+    let filtered = allPatients;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = allPatients.filter(p =>
+        `${p.firstName} ${p.lastName}`.toLowerCase().includes(term) ||
+        p.phone?.includes(term) ||
+        p.email?.toLowerCase().includes(term)
+      );
+    }
+
+    const start = (page - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+
+    setPatients(filtered.slice(start, end));
+  }, [allPatients, searchTerm, page]);
+
+  const totalPages = Math.ceil(
+    (searchTerm
+      ? allPatients.filter(p =>
+          `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+        ).length
+      : allPatients.length) / PAGE_SIZE
+  );
 
   const clearSearch = () => {
     setSearchTerm('');
     setPage(1);
   };
 
-  if (loading && patients.length === 0) {
+  // -------------------------
+  // LOADING STATE
+  // -------------------------
+  if (loading) {
     return (
-      <div className="container">
-        <div className="spinner"></div>
+      <div className="center">
+        <p>Loading patients...</p>
       </div>
     );
   }
@@ -71,20 +97,21 @@ const PatientList = () => {
 
       {/* Search */}
       <div className="card" style={{ margin: '1rem 0' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem' }}>
-          <input
-            type="text"
-            placeholder="Search by name, phone, or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="form-input"
-            style={{ flex: 1 }}
-          />
-          <button type="submit" className="btn btn-primary">Search</button>
-          <button type="button" className="btn" onClick={clearSearch}>
+        <input
+          type="text"
+          placeholder="Search by name, phone, or email..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+          className="form-input"
+        />
+        {searchTerm && (
+          <button className="btn" onClick={clearSearch} style={{ marginTop: '0.5rem' }}>
             Clear
           </button>
-        </form>
+        )}
       </div>
 
       {/* Error */}
@@ -115,16 +142,9 @@ const PatientList = () => {
                   <td>{patient.phone}</td>
                   <td>{patient.email || 'N/A'}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Link to={`/patients/${patient.id}`} className="btn btn-primary">
-                        View
-                      </Link>
-                      {hasRole(['admin', 'doctor']) && (
-                        <Link to={`/patients/${patient.id}/edit`} className="btn">
-                          Edit
-                        </Link>
-                      )}
-                    </div>
+                    <Link to={`/patients/${patient.id}`} className="btn btn-primary">
+                      View
+                    </Link>
                   </td>
                 </tr>
               ))}
