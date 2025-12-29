@@ -10,15 +10,15 @@ const ProtectedRoute = ({ children }) => {
   // While auth state is loading
   if (loading) {
     return (
-      <div className="container">
-        <div className="spinner"></div>
+      <div className="center">
+        <p>Checking authentication...</p>
       </div>
     );
   }
 
   // If not logged in → redirect to login
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   // Authorized
