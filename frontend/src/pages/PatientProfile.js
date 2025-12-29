@@ -1,7 +1,7 @@
 // src/pages/PatientProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { patientsAPI } from '../api/api';
+import { patientsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const PatientProfile = () => {
@@ -11,37 +11,49 @@ const PatientProfile = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [error, setError] = useState('');
 
+  // -------------------------
+  // LOAD PATIENT
+  // -------------------------
   useEffect(() => {
+    const loadPatient = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const res = await patientsAPI.getById(id);
+        setPatient(res.data);
+      } catch (err) {
+        console.error('Failed to load patient:', err);
+        setError('Patient not found');
+        setPatient(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadPatient();
   }, [id]);
 
-  const loadPatient = async () => {
-    try {
-      setLoading(true);
-      const res = await patientsAPI.getById(id);
-      setPatient(res.data);
-    } catch (err) {
-      console.error('Failed to load patient:', err);
-      setPatient(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // -------------------------
+  // LOADING
+  // -------------------------
   if (loading) {
     return (
-      <div className="container">
-        <div className="spinner"></div>
+      <div className="center">
+        <p>Loading patient...</p>
       </div>
     );
   }
 
+  // -------------------------
+  // ERROR
+  // -------------------------
   if (!patient) {
     return (
       <div className="container">
         <div className="card">
-          <h2>Patient Not Found</h2>
+          <h2>{error || 'Patient Not Found'}</h2>
           <Link to="/patients" className="btn btn-primary">
             Back to Patients
           </Link>
@@ -50,21 +62,22 @@ const PatientProfile = () => {
     );
   }
 
+  // -------------------------
+  // SAFE DESTRUCTURING
+  // -------------------------
   const {
     firstName,
     lastName,
     phone,
     email,
     gender,
-    dateOfBirth,
-    address = {},
-    emergencyContact = {},
-    bloodType,
-    appointments = [],
-    prescriptions = [],
-    labResults = [],
-    files = []
+    dateOfBirth
   } = patient;
+
+  // Dummy placeholders for future AWS/RDS data
+  const appointments = patient.appointments || [];
+  const prescriptions = patient.prescriptions || [];
+  const labResults = patient.labResults || [];
 
   return (
     <div className="container">
@@ -72,17 +85,20 @@ const PatientProfile = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <h1>
           {firstName} {lastName}
-          <small style={{ marginLeft: '1rem', color: '#7f8c8d' }}>ID: {patient.id}</small>
+          <small style={{ marginLeft: '1rem', color: '#7f8c8d' }}>
+            ID: {patient.id}
+          </small>
         </h1>
 
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <Link to="/patients" className="btn">
             Back
           </Link>
+          {/* Edit will be added later */}
           {hasRole(['admin', 'doctor']) && (
-            <Link to={`/patients/${id}/edit`} className="btn btn-primary">
+            <button className="btn" disabled title="Edit coming soon">
               Edit
-            </Link>
+            </button>
           )}
         </div>
       </div>
@@ -109,18 +125,9 @@ const PatientProfile = () => {
           <p><strong>Phone:</strong> {phone}</p>
           <p><strong>Email:</strong> {email || 'N/A'}</p>
 
-          <h3 style={{ marginTop: '1rem' }}>Address</h3>
-          <p>
-            {address.street || ''} {address.city || ''} {address.state || ''}
+          <p style={{ marginTop: '1rem', color: '#7f8c8d' }}>
+            More medical details will be available once database integration is added.
           </p>
-
-          <h3 style={{ marginTop: '1rem' }}>Emergency Contact</h3>
-          <p><strong>Name:</strong> {emergencyContact.name || 'N/A'}</p>
-          <p><strong>Relationship:</strong> {emergencyContact.relationship || 'N/A'}</p>
-          <p><strong>Phone:</strong> {emergencyContact.phone || 'N/A'}</p>
-
-          <h3 style={{ marginTop: '1rem' }}>Medical</h3>
-          <p><strong>Blood Type:</strong> {bloodType || 'N/A'}</p>
         </div>
       )}
 
