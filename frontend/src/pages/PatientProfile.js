@@ -24,7 +24,7 @@ const PatientProfile = () => {
         const res = await patientsAPI.getById(id);
         setPatient(res.data);
       } catch (err) {
-        console.error('Failed to load patient:', err);
+        console.error(err);
         setError('Patient not found');
         setPatient(null);
       } finally {
@@ -35,9 +35,6 @@ const PatientProfile = () => {
     loadPatient();
   }, [id]);
 
-  // -------------------------
-  // LOADING
-  // -------------------------
   if (loading) {
     return (
       <div className="center">
@@ -46,9 +43,6 @@ const PatientProfile = () => {
     );
   }
 
-  // -------------------------
-  // ERROR
-  // -------------------------
   if (!patient) {
     return (
       <div className="container">
@@ -63,7 +57,7 @@ const PatientProfile = () => {
   }
 
   // -------------------------
-  // SAFE DESTRUCTURING
+  // SAFE DATA
   // -------------------------
   const {
     firstName,
@@ -71,13 +65,11 @@ const PatientProfile = () => {
     phone,
     email,
     gender,
-    dateOfBirth
+    dateOfBirth,
+    medicalRecords = [],
+    labReports = [],
+    scans = []
   } = patient;
-
-  // Dummy placeholders for future AWS/RDS data
-  const appointments = patient.appointments || [];
-  const prescriptions = patient.prescriptions || [];
-  const labResults = patient.labResults || [];
 
   return (
     <div className="container">
@@ -94,7 +86,6 @@ const PatientProfile = () => {
           <Link to="/patients" className="btn">
             Back
           </Link>
-          {/* Edit will be added later */}
           {hasRole(['admin', 'doctor']) && (
             <button className="btn" disabled title="Edit coming soon">
               Edit
@@ -105,7 +96,7 @@ const PatientProfile = () => {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        {['overview', 'appointments', 'prescriptions', 'labs'].map(tab => (
+        {['overview', 'medical', 'labs', 'scans'].map(tab => (
           <button
             key={tab}
             className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
@@ -116,7 +107,7 @@ const PatientProfile = () => {
         ))}
       </div>
 
-      {/* Overview */}
+      {/* OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="card">
           <h3>Basic Information</h3>
@@ -124,50 +115,71 @@ const PatientProfile = () => {
           <p><strong>Date of Birth:</strong> {dateOfBirth}</p>
           <p><strong>Phone:</strong> {phone}</p>
           <p><strong>Email:</strong> {email || 'N/A'}</p>
-
-          <p style={{ marginTop: '1rem', color: '#7f8c8d' }}>
-            More medical details will be available once database integration is added.
-          </p>
         </div>
       )}
 
-      {/* Appointments */}
-      {activeTab === 'appointments' && (
+      {/* MEDICAL RECORDS */}
+      {activeTab === 'medical' && (
         <div className="card">
-          <h3>Appointments</h3>
-          {appointments.length === 0 ? (
-            <p>No appointments found.</p>
+          <h3>Medical Records</h3>
+          {medicalRecords.length === 0 ? (
+            <p>No medical records available.</p>
           ) : (
-            appointments.map((a, i) => (
-              <p key={i}>{a.date} – {a.reason}</p>
+            medicalRecords.map((m) => (
+              <div key={m.id} style={{ marginBottom: '1rem' }}>
+                <p><strong>Diagnosis:</strong> {m.diagnosis}</p>
+                <p><strong>Doctor:</strong> {m.doctor}</p>
+                <p><strong>Date:</strong> {m.date}</p>
+                <p>{m.notes}</p>
+                <hr />
+              </div>
             ))
           )}
         </div>
       )}
 
-      {/* Prescriptions */}
-      {activeTab === 'prescriptions' && (
-        <div className="card">
-          <h3>Prescriptions</h3>
-          {prescriptions.length === 0 ? (
-            <p>No prescriptions found.</p>
-          ) : (
-            prescriptions.map((p, i) => (
-              <p key={i}>{p.medication} – {p.dosage}</p>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Lab Results */}
+      {/* LAB REPORTS */}
       {activeTab === 'labs' && (
         <div className="card">
-          <h3>Lab Results</h3>
-          {labResults.length === 0 ? (
-            <p>No lab results found.</p>
+          <h3>Lab Reports</h3>
+          {labReports.length === 0 ? (
+            <p>No lab reports found.</p>
           ) : (
-            labResults.map((l, i) => (
-              <p key={i}>{l.testName} – {l.result}</p>
+            labReports.map((l) => (
+              <div key={l.id} style={{ marginBottom: '1rem' }}>
+                <p><strong>Test:</strong> {l.testName}</p>
+                <p><strong>Result:</strong> {l.result}</p>
+                <p><strong>Date:</strong> {l.date}</p>
+                {l.reportUrl && (
+                  <a href={l.reportUrl} target="_blank" rel="noreferrer">
+                    View Report
+                  </a>
+                )}
+                <hr />
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* SCANS */}
+      {activeTab === 'scans' && (
+        <div className="card">
+          <h3>Scans / Imaging</h3>
+          {scans.length === 0 ? (
+            <p>No scans available.</p>
+          ) : (
+            scans.map((s) => (
+              <div key={s.id} style={{ marginBottom: '1rem' }}>
+                <p><strong>Type:</strong> {s.scanType}</p>
+                <p><strong>Date:</strong> {s.date}</p>
+                {s.imageUrl && (
+                  <a href={s.imageUrl} target="_blank" rel="noreferrer">
+                    View Scan
+                  </a>
+                )}
+                <hr />
+              </div>
             ))
           )}
         </div>
