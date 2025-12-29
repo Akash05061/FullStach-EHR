@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middleware/authMiddleware');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 const {
   getAllPatients,
@@ -9,8 +9,9 @@ const {
   createPatient
 } = require('../controllers/patientController');
 
-router.get('/', auth, getAllPatients);
-router.get('/:id', auth, getPatientById);
-router.post('/', auth, createPatient);
+// Protected routes
+router.get('/', authenticateToken, getAllPatients);
+router.get('/:id', authenticateToken, getPatientById);
+router.post('/', authenticateToken, createPatient);
 
 module.exports = router;
