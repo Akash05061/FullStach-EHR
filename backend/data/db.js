@@ -1,15 +1,3 @@
-// backend/data/db.js
-
-const users = [
-  {
-    id: 1,
-    email: 'admin@example.com',
-    password: 'password',
-    role: 'admin',
-    name: 'Admin User'
-  }
-];
-
 const patients = [
   {
     id: 1,
@@ -19,26 +7,34 @@ const patients = [
     gender: 'Male',
     phone: '9876543210',
     email: 'ramesh@gmail.com',
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 2,
-    firstName: 'Sita',
-    lastName: 'Sharma',
-    dateOfBirth: '1988-09-22',
-    gender: 'Female',
-    phone: '9988776655',
-    email: 'sita@gmail.com',
-    createdAt: new Date().toISOString()
+
+    medicalRecords: [
+      {
+        id: 1,
+        diagnosis: 'Diabetes',
+        notes: 'Under control',
+        doctor: 'Dr. Sharma',
+        date: '2024-12-01'
+      }
+    ],
+
+    labReports: [
+      {
+        id: 1,
+        testName: 'Blood Sugar',
+        result: '140 mg/dL',
+        date: '2024-12-02',
+        reportUrl: '/dummy/labs/blood-sugar.pdf'
+      }
+    ],
+
+    scans: [
+      {
+        id: 1,
+        scanType: 'Chest X-Ray',
+        date: '2024-12-05',
+        imageUrl: '/dummy/scans/chest-xray.jpg'
+      }
+    ]
   }
 ];
-
-let patientIdCounter = patients.length + 1;
-
-const getNextPatientId = () => patientIdCounter++;
-
-module.exports = {
-  users,
-  patients,
-  getNextPatientId
-};
