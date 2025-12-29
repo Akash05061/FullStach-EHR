@@ -1,13 +1,37 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
-
 export const useAuth = () => useContext(AuthContext);
+
+// 🔧 Create axios instance
+const api = axios.create({
+  baseURL: 'http://15.206.73.100:3001/api'
+});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // --------------------
+  // LOAD AUTH FROM STORAGE (IMPORTANT)
+  // --------------------
+  useEffect(() => {
+    const storedUser = localStorage.getItem('ehr_user');
+    const storedToken = localStorage.getItem('ehr_token');
+
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      setToken(storedToken);
+
+      api.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${storedToken}`;
+    }
+
+    setLoading(false);
+  }, []);
 
   // --------------------
   // LOGIN
@@ -16,18 +40,22 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        'http://15.206.73.100:3001/api/auth/login',
-        credentials,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const res = await api.post('/auth/login', credentials);
 
-      // Backend returns { user, token }
-      setUser(res.data.user);
+      const { user, token } = res.data;
+
+      // store
+      localStorage.setItem('ehr_user', JSON.stringify(user));
+      localStorage.setItem('ehr_token', token);
+
+      // set state
+      setUser(user);
+      setToken(token);
+
+      // attach token to axios
+      api.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${token}`;
 
       return { success: true };
     } catch (err) {
@@ -46,10 +74,16 @@ export const AuthProvider = ({ children }) => {
   // --------------------
   const logout = () => {
     setUser(null);
+    setToken(null);
+
+    localStorage.removeItem('ehr_user');
+    localStorage.removeItem('ehr_token');
+
+    delete api.defaults.headers.common['Authorization'];
   };
 
   // --------------------
-  // ROLE CHECK (FIXED)
+  // ROLE CHECK
   // --------------------
   const hasRole = (roles = []) => {
     if (!user) return false;
@@ -61,10 +95,12 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        token,
         loading,
         login,
         logout,
-        hasRole
+        hasRole,
+        api // 🔥 expose api for components
       }}
     >
       {children}
