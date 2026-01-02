@@ -13,7 +13,7 @@ const api = axios.create({
 // -----------------------------
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('ehr_token'); // ✅ FIXED KEY
+    const token = localStorage.getItem('ehr_token'); // ✅ correct key
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,9 +26,18 @@ api.interceptors.request.use(
    PATIENTS API
 ------------------------- */
 export const patientsAPI = {
+  // Get all patients
   getAll: () => api.get('/patients'),
+
+  // Get patient by ID
   getById: (id) => api.get(`/patients/${id}`),
-  create: (data) => api.post('/patients', data)
+
+  // Create new patient
+  create: (data) => api.post('/patients', data),
+
+  // 🩺 ADD MEDICAL RECORD
+  addMedicalRecord: (id, data) =>
+    api.post(`/patients/${id}/medical-records`, data)
 };
 
 /* -------------------------
