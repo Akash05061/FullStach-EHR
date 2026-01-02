@@ -1,5 +1,21 @@
 // backend/data/db.js
 
+// --------------------
+// USERS (FOR LOGIN)
+// --------------------
+const users = [
+  {
+    id: 1,
+    email: 'admin@example.com',
+    password: 'password', // plain text for now (OK for demo)
+    role: 'admin',
+    name: 'Admin User'
+  }
+];
+
+// --------------------
+// PATIENTS
+// --------------------
 const patients = [
   {
     id: 1,
@@ -27,15 +43,7 @@ const patients = [
     gender: 'Male',
     phone: '9876543210',
     email: 'ramesh.kumar@gmail.com',
-    medicalRecords: [
-      {
-        id: 1,
-        diagnosis: 'Type 2 Diabetes',
-        notes: 'Under control with medication',
-        date: '2025-12-10',
-        doctor: 'Dr. Sharma'
-      }
-    ]
+    medicalRecords: []
   },
   {
     id: 3,
@@ -66,84 +74,20 @@ const patients = [
     phone: '9090909090',
     email: 'ananya.iyer@gmail.com',
     medicalRecords: []
-  },
-  {
-    id: 6,
-    firstName: 'Vikas',
-    lastName: 'Patil',
-    dateOfBirth: '1988-02-14',
-    gender: 'Male',
-    phone: '9012345678',
-    email: 'vikas.patil@gmail.com',
-    medicalRecords: []
-  },
-  {
-    id: 7,
-    firstName: 'Neha',
-    lastName: 'Singh',
-    dateOfBirth: '1996-07-30',
-    gender: 'Female',
-    phone: '9876501234',
-    email: 'neha.singh@gmail.com',
-    medicalRecords: []
-  },
-  {
-    id: 8,
-    firstName: 'Arjun',
-    lastName: 'Mehta',
-    dateOfBirth: '1982-01-25',
-    gender: 'Male',
-    phone: '9765432109',
-    email: 'arjun.mehta@gmail.com',
-    medicalRecords: []
-  },
-  {
-    id: 9,
-    firstName: 'Pooja',
-    lastName: 'Nair',
-    dateOfBirth: '1993-10-05',
-    gender: 'Female',
-    phone: '9654321876',
-    email: 'pooja.nair@gmail.com',
-    medicalRecords: []
-  },
-  {
-    id: 10,
-    firstName: 'Kiran',
-    lastName: 'Rao',
-    dateOfBirth: '1979-06-18',
-    gender: 'Male',
-    phone: '9345678123',
-    email: 'kiran.rao@gmail.com',
-    medicalRecords: []
-  },
-  {
-    id: 11,
-    firstName: 'Meena',
-    lastName: 'Joshi',
-    dateOfBirth: '1987-08-09',
-    gender: 'Female',
-    phone: '9887766554',
-    email: 'meena.joshi@gmail.com',
-    medicalRecords: []
-  },
-  {
-    id: 12,
-    firstName: 'Suresh',
-    lastName: 'Naik',
-    dateOfBirth: '1975-12-01',
-    gender: 'Male',
-    phone: '9123987654',
-    email: 'suresh.naik@gmail.com',
-    medicalRecords: []
   }
 ];
 
+// --------------------
+// ID GENERATOR
+// --------------------
 let patientIdCounter = patients.length + 1;
-
 const getNextPatientId = () => patientIdCounter++;
 
+// --------------------
+// EXPORT EVERYTHING
+// --------------------
 module.exports = {
+  users,            // ✅ REQUIRED FOR LOGIN
   patients,
   getNextPatientId
 };
