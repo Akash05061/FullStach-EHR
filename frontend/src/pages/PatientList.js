@@ -1,188 +1,95 @@
 // src/pages/PatientList.js
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { patientsAPI } from '../services/api';
+import { patientsAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
-
-const PAGE_SIZE = 10;
 
 const PatientList = () => {
   const { hasRole } = useAuth();
 
-  const [allPatients, setAllPatients] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
 
-  // -------------------------
-  // FETCH PATIENTS
-  // -------------------------
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        setLoading(true);
-        setError('');
-
-        const res = await patientsAPI.getAll();
-        setAllPatients(res.data);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load patients');
-      } finally {
-        setLoading(false);
-      }
+    const loadPatients = async () => {
+      const res = await patientsAPI.getAll();
+      setPatients(res.data);
+      setLoading(false);
     };
-
-    fetchPatients();
+    loadPatients();
   }, []);
 
-  // -------------------------
-  // SEARCH + PAGINATION
-  // -------------------------
-  useEffect(() => {
-    let filtered = allPatients;
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = allPatients.filter(p =>
-        `${p.firstName} ${p.lastName}`.toLowerCase().includes(term) ||
-        p.phone?.includes(term) ||
-        p.email?.toLowerCase().includes(term)
-      );
-    }
-
-    const start = (page - 1) * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-
-    setPatients(filtered.slice(start, end));
-  }, [allPatients, searchTerm, page]);
-
-  const totalPages = Math.ceil(
-    (searchTerm
-      ? allPatients.filter(p =>
-          `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
-        ).length
-      : allPatients.length) / PAGE_SIZE
-  );
-
-  const clearSearch = () => {
-    setSearchTerm('');
-    setPage(1);
-  };
-
-  // -------------------------
-  // LOADING STATE
-  // -------------------------
-  if (loading) {
+  // 🔍 SEARCH LOGIC
+  const filteredPatients = patients.filter((p) => {
+    const term = search.toLowerCase();
     return (
-      <div className="center">
-        <p>Loading patients...</p>
-      </div>
+      p.firstName.toLowerCase().includes(term) ||
+      p.lastName.toLowerCase().includes(term) ||
+      p.phone.includes(term) ||
+      (p.email && p.email.toLowerCase().includes(term))
     );
+  });
+
+  if (loading) {
+    return <div className="center">Loading patients...</div>;
   }
 
   return (
     <div className="container">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <h1>Patients</h1>
-        {hasRole(['admin', 'doctor', 'receptionist']) && (
+        {hasRole(['admin', 'doctor']) && (
           <Link to="/patients/new" className="btn btn-success">
-            Add New Patient
+            Add Patient
           </Link>
         )}
       </div>
 
-      {/* Search */}
-      <div className="card" style={{ margin: '1rem 0' }}>
-        <input
-          type="text"
-          placeholder="Search by name, phone, or email..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setPage(1);
-          }}
-          className="form-input"
-        />
-        {searchTerm && (
-          <button className="btn" onClick={clearSearch} style={{ marginTop: '0.5rem' }}>
-            Clear
-          </button>
-        )}
-      </div>
+      {/* 🔍 SEARCH BOX */}
+      <input
+        type="text"
+        placeholder="Search by name, phone, or email"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+          margin: '1rem 0',
+          padding: '0.5rem',
+          width: '100%'
+        }}
+      />
 
-      {/* Error */}
-      {error && <div className="alert alert-error">{error}</div>}
-
-      {/* Table */}
-      {patients.length > 0 ? (
-        <>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>DOB</th>
-                <th>Gender</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {patients.map((patient) => (
-                <tr key={patient.id}>
-                  <td>{patient.id}</td>
-                  <td>{patient.firstName} {patient.lastName}</td>
-                  <td>{patient.dateOfBirth}</td>
-                  <td>{patient.gender}</td>
-                  <td>{patient.phone}</td>
-                  <td>{patient.email || 'N/A'}</td>
-                  <td>
-                    <Link to={`/patients/${patient.id}`} className="btn btn-primary">
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
-              <button
-                className="btn"
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-              >
-                Previous
-              </button>
-
-              <span>Page {page} of {totalPages}</span>
-
-              <button
-                className="btn"
-                disabled={page === totalPages}
-                onClick={() => setPage(p => p + 1)}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
+      {/* TABLE */}
+      {filteredPatients.length === 0 ? (
+        <p>No patients found.</p>
       ) : (
-        <div className="card">
-          <p>No patients found.</p>
-          {hasRole(['admin', 'doctor', 'receptionist']) && (
-            <Link to="/patients/new" className="btn btn-success">
-              Add Your First Patient
-            </Link>
-          )}
-        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Phone</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPatients.map((p) => (
+              <tr key={p.id}>
+                <td>{p.id}</td>
+                <td>{p.firstName} {p.lastName}</td>
+                <td>{p.dateOfBirth}</td>
+                <td>{p.phone}</td>
+                <td>
+                  <Link to={`/patients/${p.id}`} className="btn btn-primary">
+                    View
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
