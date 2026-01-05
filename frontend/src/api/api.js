@@ -5,7 +5,7 @@ import axios from 'axios';
  * Token is injected from localStorage
  */
 const api = axios.create({
-  baseURL: 'http://43.205.208.119:3001/api'
+  baseURL: 'http://13.233.111.188:3001/api'
 });
 
 // -----------------------------
