@@ -1,7 +1,7 @@
 // src/pages/PatientForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { patientsAPI } from '../services/api';
+import { patientsAPI } from '../api/api';
 
 const emptyForm = {
   firstName: '',
