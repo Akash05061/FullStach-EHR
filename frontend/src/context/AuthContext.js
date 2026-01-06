@@ -6,7 +6,7 @@ export const useAuth = () => useContext(AuthContext);
 
 // 🔧 Create axios instance
 const api = axios.create({
-  baseURL: 'http://13.233.111.188:3001/api'
+  baseURL: 'http://65.0.103.216:3001/api'
 });
 
 export const AuthProvider = ({ children }) => {
