@@ -1,5 +1,3 @@
-// backend/data/db.js
-
 // --------------------
 // USERS (FOR LOGIN)
 // --------------------
@@ -7,14 +5,14 @@ const users = [
   {
     id: 1,
     email: 'admin@example.com',
-    password: 'password', // plain text for now (OK for demo)
+    password: 'password', // plain text (OK for demo)
     role: 'admin',
     name: 'Admin User'
   }
 ];
 
 // --------------------
-// PATIENTS
+// PATIENTS (IN-MEMORY)
 // --------------------
 const patients = [
   {
@@ -25,6 +23,7 @@ const patients = [
     gender: 'Male',
     phone: '85645155',
     email: 'akash.doe@gmail.com',
+
     medicalRecords: [
       {
         id: 1,
@@ -33,8 +32,45 @@ const patients = [
         date: '2026-01-01',
         doctor: 'Dr. Admin'
       }
+    ],
+
+    labReports: [
+      {
+        id: 1,
+        testName: 'Blood Sugar (Fasting)',
+        result: '98 mg/dL',
+        date: '2026-01-05',
+        remarks: 'Normal range'
+      },
+      {
+        id: 2,
+        testName: 'Complete Blood Count',
+        result: 'All values normal',
+        date: '2026-01-06',
+        remarks: 'No infection detected'
+      }
+    ],
+
+    scans: [
+      {
+        id: 1,
+        name: 'Chest X-Ray',
+        type: 'X-Ray',
+        date: '2026-01-06',
+        notes: 'Mild lung infection',
+        imageUrl: '/scans/chest-xray.png'
+      },
+      {
+        id: 2,
+        name: 'Brain MRI',
+        type: 'MRI',
+        date: '2026-01-04',
+        notes: 'No abnormalities found',
+        imageUrl: '/scans/brain-mri.png'
+      }
     ]
   },
+
   {
     id: 2,
     firstName: 'Ramesh',
@@ -43,8 +79,11 @@ const patients = [
     gender: 'Male',
     phone: '9876543210',
     email: 'ramesh.kumar@gmail.com',
-    medicalRecords: []
+    medicalRecords: [],
+    labReports: [],
+    scans: []
   },
+
   {
     id: 3,
     firstName: 'Sita',
@@ -53,8 +92,11 @@ const patients = [
     gender: 'Female',
     phone: '9988776655',
     email: 'sita.sharma@gmail.com',
-    medicalRecords: []
+    medicalRecords: [],
+    labReports: [],
+    scans: []
   },
+
   {
     id: 4,
     firstName: 'Rahul',
@@ -63,8 +105,11 @@ const patients = [
     gender: 'Male',
     phone: '9123456780',
     email: 'rahul.verma@gmail.com',
-    medicalRecords: []
+    medicalRecords: [],
+    labReports: [],
+    scans: []
   },
+
   {
     id: 5,
     firstName: 'Ananya',
@@ -73,21 +118,30 @@ const patients = [
     gender: 'Female',
     phone: '9090909090',
     email: 'ananya.iyer@gmail.com',
-    medicalRecords: []
+    medicalRecords: [],
+    labReports: [],
+    scans: []
   }
 ];
 
 // --------------------
-// ID GENERATOR
+// ID GENERATORS
 // --------------------
 let patientIdCounter = patients.length + 1;
 const getNextPatientId = () => patientIdCounter++;
 
+const getNextMedicalId = () => Date.now();
+const getNextLabId = () => Date.now();
+const getNextScanId = () => Date.now();
+
 // --------------------
-// EXPORT EVERYTHING
+// EXPORTS
 // --------------------
 module.exports = {
-  users,            // ✅ REQUIRED FOR LOGIN
+  users,
   patients,
-  getNextPatientId
+  getNextPatientId,
+  getNextMedicalId,
+  getNextLabId,
+  getNextScanId
 };
