@@ -1,17 +1,21 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticateToken } = require('../middleware/authMiddleware');
-
 const {
   getAllPatients,
   getPatientById,
-  createPatient
+  createPatient,
+  addLabReport,
+  addScan
 } = require('../controllers/patientController');
 
-// Protected routes
-router.get('/', authenticateToken, getAllPatients);
-router.get('/:id', authenticateToken, getPatientById);
-router.post('/', authenticateToken, createPatient);
+// Patients
+router.get('/', getAllPatients);
+router.get('/:id', getPatientById);
+router.post('/', createPatient);
+
+// Lab Reports & Scans
+router.post('/:id/lab-reports', addLabReport);
+router.post('/:id/scans', addScan);
 
 module.exports = router;
