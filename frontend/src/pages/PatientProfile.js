@@ -11,14 +11,15 @@ const PatientProfile = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('overview');
 
-  // Medical record form
+  /* --------------------
+     FORMS STATE
+  -------------------- */
   const [medicalForm, setMedicalForm] = useState({
     diagnosis: '',
     notes: '',
     date: ''
   });
 
-  // Lab report form
   const [labForm, setLabForm] = useState({
     name: '',
     result: '',
@@ -26,7 +27,6 @@ const PatientProfile = () => {
     remarks: ''
   });
 
-  // Scan form
   const [scanForm, setScanForm] = useState({
     name: '',
     scanType: '',
@@ -34,6 +34,11 @@ const PatientProfile = () => {
     notes: ''
   });
 
+  const [scanFile, setScanFile] = useState(null); // 🔥 REQUIRED
+
+  /* --------------------
+     LOAD PATIENT
+  -------------------- */
   const loadPatient = async () => {
     const res = await patientsAPI.getById(id);
     setPatient(res.data);
@@ -44,9 +49,9 @@ const PatientProfile = () => {
     loadPatient();
   }, [id]);
 
-  // -------------------------
-  // ADD MEDICAL RECORD
-  // -------------------------
+  /* --------------------
+     MEDICAL RECORD
+  -------------------- */
   const submitMedicalRecord = async (e) => {
     e.preventDefault();
 
@@ -59,9 +64,9 @@ const PatientProfile = () => {
     loadPatient();
   };
 
-  // -------------------------
-  // ADD LAB REPORT
-  // -------------------------
+  /* --------------------
+     LAB REPORT
+  -------------------- */
   const submitLabReport = async (e) => {
     e.preventDefault();
 
@@ -71,15 +76,28 @@ const PatientProfile = () => {
     loadPatient();
   };
 
-  // -------------------------
-  // ADD SCAN
-  // -------------------------
+  /* --------------------
+     SCAN UPLOAD (FILE)
+  -------------------- */
   const submitScan = async (e) => {
     e.preventDefault();
 
-    await patientsAPI.addScan(id, scanForm);
+    if (!scanFile) {
+      alert('Please select a scan image');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', scanForm.name);
+    formData.append('scanType', scanForm.scanType);
+    formData.append('date', scanForm.date);
+    formData.append('notes', scanForm.notes);
+    formData.append('scan', scanFile); // 🔥 MUST MATCH multer
+
+    await patientsAPI.addScan(id, formData);
 
     setScanForm({ name: '', scanType: '', date: '', notes: '' });
+    setScanFile(null);
     loadPatient();
   };
 
@@ -89,7 +107,7 @@ const PatientProfile = () => {
     <div className="container">
       <h1>{patient.firstName} {patient.lastName}</h1>
 
-      {/* Tabs */}
+      {/* TABS */}
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
         <button onClick={() => setTab('overview')}>Overview</button>
         <button onClick={() => setTab('medical')}>Medical</button>
@@ -205,7 +223,7 @@ const PatientProfile = () => {
         <div className="card">
           <h3>Add Scan</h3>
 
-          <form onSubmit={submitScan}>
+          <form onSubmit={submitScan} encType="multipart/form-data">
             <input
               placeholder="Scan Name (e.g., Chest X-Ray)"
               value={scanForm.name}
@@ -224,11 +242,21 @@ const PatientProfile = () => {
               onChange={e => setScanForm({ ...scanForm, date: e.target.value })}
               required
             />
+
+            {/* 🔥 FILE PICKER */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setScanFile(e.target.files[0])}
+              required
+            />
+
             <textarea
               placeholder="Notes"
               value={scanForm.notes}
               onChange={e => setScanForm({ ...scanForm, notes: e.target.value })}
             />
+
             <button className="btn btn-primary">Add Scan</button>
           </form>
 
@@ -243,6 +271,16 @@ const PatientProfile = () => {
                 <p><strong>{s.name}</strong> ({s.date})</p>
                 <p>Type: {s.scanType}</p>
                 <p>{s.notes}</p>
+
+                {/* 🔥 SHOW IMAGE */}
+                {s.imageUrl && (
+                  <img
+                    src={`http://13.127.142.221:3001${s.imageUrl}`}
+                    alt={s.name}
+                    style={{ maxWidth: '300px', marginTop: '0.5rem' }}
+                  />
+                )}
+
                 <hr />
               </div>
             ))
