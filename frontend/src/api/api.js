@@ -2,15 +2,15 @@ import axios from 'axios';
 
 /**
  * Single Axios instance for the entire app
- * Token is injected from localStorage
+ * JWT token is injected automatically
  */
 const api = axios.create({
   baseURL: 'http://13.127.142.221:3001/api'
 });
 
-// -----------------------------
-// Attach JWT automatically
-// -----------------------------
+/* -----------------------------
+   ATTACH JWT TOKEN
+----------------------------- */
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('ehr_token'); // ✅ correct key
@@ -35,9 +35,21 @@ export const patientsAPI = {
   // Create new patient
   create: (data) => api.post('/patients', data),
 
-  // 🩺 ADD MEDICAL RECORD
+  // 🩺 Add medical record
   addMedicalRecord: (id, data) =>
-    api.post(`/patients/${id}/medical-records`, data)
+    api.post(`/patients/${id}/medical-records`, data),
+
+  // 🧪 Add lab report (dummy / JSON)
+  addLabReport: (id, data) =>
+    api.post(`/patients/${id}/lab-reports`, data),
+
+  // 🖼️ Upload scan image (multipart)
+  addScan: (id, formData) =>
+    api.post(`/patients/${id}/scans`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 };
 
 /* -------------------------
