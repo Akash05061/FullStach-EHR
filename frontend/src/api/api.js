@@ -5,7 +5,7 @@ import axios from 'axios';
  * JWT token is injected automatically
  */
 const api = axios.create({
-  baseURL: 'http://13.127.142.221:3001/api'
+  baseURL: 'http://3.110.120.237:3001/api' // ✅ SAME IP EVERYWHERE
 });
 
 /* -----------------------------
@@ -13,7 +13,7 @@ const api = axios.create({
 ----------------------------- */
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('ehr_token'); // ✅ correct key
+    const token = localStorage.getItem('ehr_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,29 +26,22 @@ api.interceptors.request.use(
    PATIENTS API
 ------------------------- */
 export const patientsAPI = {
-  // Get all patients
   getAll: () => api.get('/patients'),
-
-  // Get patient by ID
   getById: (id) => api.get(`/patients/${id}`),
-
-  // Create new patient
   create: (data) => api.post('/patients', data),
 
-  // 🩺 Add medical record
+  // 🩺 MEDICAL
   addMedicalRecord: (id, data) =>
     api.post(`/patients/${id}/medical-records`, data),
 
-  // 🧪 Add lab report (dummy / JSON)
+  // 🧪 LAB
   addLabReport: (id, data) =>
     api.post(`/patients/${id}/lab-reports`, data),
 
-  // 🖼️ Upload scan image (multipart)
+  // 🖼️ SCANS
   addScan: (id, formData) =>
     api.post(`/patients/${id}/scans`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
 };
 
@@ -58,9 +51,7 @@ export const patientsAPI = {
 export const dashboardAPI = {
   overview: async () => {
     const res = await api.get('/patients');
-    return {
-      totalPatients: res.data.length
-    };
+    return { totalPatients: res.data.length };
   }
 };
 

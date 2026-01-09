@@ -49,11 +49,38 @@ const createPatient = (req, res) => {
 };
 
 // --------------------
+// ADD MEDICAL RECORD
+// --------------------
+const addMedicalRecord = (req, res) => {
+  const patient = patients.find(p => p.id === Number(req.params.id));
+
+  if (!patient) {
+    return res.status(404).json({ message: 'Patient not found' });
+  }
+
+  const { diagnosis, notes, date, doctor } = req.body;
+
+  if (!diagnosis || !date) {
+    return res.status(400).json({ message: 'Diagnosis and date required' });
+  }
+
+  const record = {
+    id: patient.medicalRecords.length + 1,
+    diagnosis,
+    notes: notes || '',
+    date,
+    doctor: doctor || 'Unknown'
+  };
+
+  patient.medicalRecords.push(record);
+  res.status(201).json(record);
+};
+
+// --------------------
 // ADD LAB REPORT
 // --------------------
 const addLabReport = (req, res) => {
-  const patientId = Number(req.params.id);
-  const patient = patients.find(p => p.id === patientId);
+  const patient = patients.find(p => p.id === Number(req.params.id));
 
   if (!patient) {
     return res.status(404).json({ message: 'Patient not found' });
@@ -66,7 +93,7 @@ const addLabReport = (req, res) => {
     name,
     result,
     date,
-    remarks
+    remarks: remarks || ''
   };
 
   patient.labReports.push(report);
@@ -74,14 +101,17 @@ const addLabReport = (req, res) => {
 };
 
 // --------------------
-// ADD SCAN
+// ADD SCAN (FILE UPLOAD)
 // --------------------
 const addScan = (req, res) => {
-  const patientId = Number(req.params.id);
-  const patient = patients.find(p => p.id === patientId);
+  const patient = patients.find(p => p.id === Number(req.params.id));
 
   if (!patient) {
     return res.status(404).json({ message: 'Patient not found' });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'Scan image required' });
   }
 
   const { name, scanType, date, notes } = req.body;
@@ -91,17 +121,22 @@ const addScan = (req, res) => {
     name,
     scanType,
     date,
-    notes
+    notes: notes || '',
+    imageUrl: `/scans/${req.file.filename}`
   };
 
   patient.scans.push(scan);
   res.status(201).json(scan);
 };
 
+// --------------------
+// EXPORTS
+// --------------------
 module.exports = {
   getAllPatients,
   getPatientById,
   createPatient,
+  addMedicalRecord,
   addLabReport,
   addScan
 };

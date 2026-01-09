@@ -12,12 +12,12 @@ const PatientProfile = () => {
   const [tab, setTab] = useState('overview');
 
   /* --------------------
-     FORMS STATE
+     FORM STATES
   -------------------- */
   const [medicalForm, setMedicalForm] = useState({
     diagnosis: '',
-    notes: '',
-    date: ''
+    date: '',
+    notes: ''
   });
 
   const [labForm, setLabForm] = useState({
@@ -34,14 +34,22 @@ const PatientProfile = () => {
     notes: ''
   });
 
-  const [scanFile, setScanFile] = useState(null); // 🔥 REQUIRED
+  const [scanFile, setScanFile] = useState(null);
 
   /* --------------------
      LOAD PATIENT
   -------------------- */
   const loadPatient = async () => {
+    setLoading(true);
     const res = await patientsAPI.getById(id);
-    setPatient(res.data);
+
+    setPatient({
+      ...res.data,
+      medicalRecords: res.data.medicalRecords || [],
+      labReports: res.data.labReports || [],
+      scans: res.data.scans || []
+    });
+
     setLoading(false);
   };
 
@@ -60,7 +68,7 @@ const PatientProfile = () => {
       doctor: user?.name
     });
 
-    setMedicalForm({ diagnosis: '', notes: '', date: '' });
+    setMedicalForm({ diagnosis: '', date: '', notes: '' });
     loadPatient();
   };
 
@@ -69,21 +77,19 @@ const PatientProfile = () => {
   -------------------- */
   const submitLabReport = async (e) => {
     e.preventDefault();
-
     await patientsAPI.addLabReport(id, labForm);
-
     setLabForm({ name: '', result: '', date: '', remarks: '' });
     loadPatient();
   };
 
   /* --------------------
-     SCAN UPLOAD (FILE)
+     SCAN UPLOAD
   -------------------- */
   const submitScan = async (e) => {
     e.preventDefault();
 
     if (!scanFile) {
-      alert('Please select a scan image');
+      alert('Please select an image');
       return;
     }
 
@@ -92,7 +98,7 @@ const PatientProfile = () => {
     formData.append('scanType', scanForm.scanType);
     formData.append('date', scanForm.date);
     formData.append('notes', scanForm.notes);
-    formData.append('scan', scanFile); // 🔥 MUST MATCH multer
+    formData.append('scan', scanFile);
 
     await patientsAPI.addScan(id, formData);
 
@@ -118,9 +124,9 @@ const PatientProfile = () => {
       {/* OVERVIEW */}
       {tab === 'overview' && (
         <div className="card">
-          <p><strong>Gender:</strong> {patient.gender}</p>
-          <p><strong>DOB:</strong> {patient.dateOfBirth}</p>
-          <p><strong>Phone:</strong> {patient.phone}</p>
+          <p><b>Gender:</b> {patient.gender}</p>
+          <p><b>DOB:</b> {patient.dateOfBirth}</p>
+          <p><b>Phone:</b> {patient.phone}</p>
         </div>
       )}
 
@@ -129,42 +135,41 @@ const PatientProfile = () => {
         <div className="card">
           <h3>Add Medical Record</h3>
 
-          <form onSubmit={submitMedicalRecord}>
+          <form onSubmit={submitMedicalRecord} style={{ display: 'grid', gap: '0.5rem' }}>
             <input
               placeholder="Diagnosis"
               value={medicalForm.diagnosis}
               onChange={e => setMedicalForm({ ...medicalForm, diagnosis: e.target.value })}
               required
             />
+
+            {/* ✅ FIXED DATE INPUT */}
             <input
               type="date"
               value={medicalForm.date}
               onChange={e => setMedicalForm({ ...medicalForm, date: e.target.value })}
               required
             />
+
             <textarea
               placeholder="Notes"
               value={medicalForm.notes}
               onChange={e => setMedicalForm({ ...medicalForm, notes: e.target.value })}
             />
+
             <button className="btn btn-primary">Add Record</button>
           </form>
 
           <hr />
 
-          <h3>Medical History</h3>
-          {patient.medicalRecords.length === 0 ? (
-            <p>No records yet</p>
-          ) : (
-            patient.medicalRecords.map(r => (
-              <div key={r.id}>
-                <p><strong>{r.diagnosis}</strong> ({r.date})</p>
-                <p>{r.notes}</p>
-                <p>Doctor: {r.doctor}</p>
-                <hr />
-              </div>
-            ))
-          )}
+          {patient.medicalRecords.map(r => (
+            <div key={r.id}>
+              <p><b>{r.diagnosis}</b> ({r.date})</p>
+              <p>{r.notes}</p>
+              <p>Doctor: {r.doctor}</p>
+              <hr />
+            </div>
+          ))}
         </div>
       )}
 
@@ -173,48 +178,32 @@ const PatientProfile = () => {
         <div className="card">
           <h3>Add Lab Report</h3>
 
-          <form onSubmit={submitLabReport}>
-            <input
-              placeholder="Test Name"
-              value={labForm.name}
-              onChange={e => setLabForm({ ...labForm, name: e.target.value })}
-              required
-            />
-            <input
-              placeholder="Result"
-              value={labForm.result}
-              onChange={e => setLabForm({ ...labForm, result: e.target.value })}
-              required
-            />
-            <input
-              type="date"
-              value={labForm.date}
-              onChange={e => setLabForm({ ...labForm, date: e.target.value })}
-              required
-            />
-            <textarea
-              placeholder="Remarks"
-              value={labForm.remarks}
-              onChange={e => setLabForm({ ...labForm, remarks: e.target.value })}
-            />
+          <form onSubmit={submitLabReport} style={{ display: 'grid', gap: '0.5rem' }}>
+            <input placeholder="Test Name" value={labForm.name}
+              onChange={e => setLabForm({ ...labForm, name: e.target.value })} required />
+
+            <input placeholder="Result" value={labForm.result}
+              onChange={e => setLabForm({ ...labForm, result: e.target.value })} required />
+
+            <input type="date" value={labForm.date}
+              onChange={e => setLabForm({ ...labForm, date: e.target.value })} required />
+
+            <textarea placeholder="Remarks" value={labForm.remarks}
+              onChange={e => setLabForm({ ...labForm, remarks: e.target.value })} />
+
             <button className="btn btn-primary">Add Lab Report</button>
           </form>
 
           <hr />
 
-          <h3>Lab Reports</h3>
-          {patient.labReports.length === 0 ? (
-            <p>No lab reports yet</p>
-          ) : (
-            patient.labReports.map(r => (
-              <div key={r.id}>
-                <p><strong>{r.name}</strong> ({r.date})</p>
-                <p>Result: {r.result}</p>
-                <p>{r.remarks}</p>
-                <hr />
-              </div>
-            ))
-          )}
+          {patient.labReports.map(r => (
+            <div key={r.id}>
+              <p><b>{r.name}</b> ({r.date})</p>
+              <p>Result: {r.result}</p>
+              <p>{r.remarks}</p>
+              <hr />
+            </div>
+          ))}
         </div>
       )}
 
@@ -223,68 +212,41 @@ const PatientProfile = () => {
         <div className="card">
           <h3>Add Scan</h3>
 
-          <form onSubmit={submitScan} encType="multipart/form-data">
-            <input
-              placeholder="Scan Name (e.g., Chest X-Ray)"
-              value={scanForm.name}
-              onChange={e => setScanForm({ ...scanForm, name: e.target.value })}
-              required
-            />
-            <input
-              placeholder="Scan Type (X-Ray / MRI / CT)"
-              value={scanForm.scanType}
-              onChange={e => setScanForm({ ...scanForm, scanType: e.target.value })}
-              required
-            />
-            <input
-              type="date"
-              value={scanForm.date}
-              onChange={e => setScanForm({ ...scanForm, date: e.target.value })}
-              required
-            />
+          <form onSubmit={submitScan} style={{ display: 'grid', gap: '0.5rem' }}>
+            <input placeholder="Scan Name" value={scanForm.name}
+              onChange={e => setScanForm({ ...scanForm, name: e.target.value })} required />
 
-            {/* 🔥 FILE PICKER */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setScanFile(e.target.files[0])}
-              required
-            />
+            <input placeholder="Scan Type" value={scanForm.scanType}
+              onChange={e => setScanForm({ ...scanForm, scanType: e.target.value })} required />
 
-            <textarea
-              placeholder="Notes"
-              value={scanForm.notes}
-              onChange={e => setScanForm({ ...scanForm, notes: e.target.value })}
-            />
+            <input type="date" value={scanForm.date}
+              onChange={e => setScanForm({ ...scanForm, date: e.target.value })} required />
+
+            <input type="file" accept="image/*"
+              onChange={e => setScanFile(e.target.files[0])} required />
+
+            <textarea placeholder="Notes" value={scanForm.notes}
+              onChange={e => setScanForm({ ...scanForm, notes: e.target.value })} />
 
             <button className="btn btn-primary">Add Scan</button>
           </form>
 
           <hr />
 
-          <h3>Scans</h3>
-          {patient.scans.length === 0 ? (
-            <p>No scans yet</p>
-          ) : (
-            patient.scans.map(s => (
-              <div key={s.id}>
-                <p><strong>{s.name}</strong> ({s.date})</p>
-                <p>Type: {s.scanType}</p>
-                <p>{s.notes}</p>
-
-                {/* 🔥 SHOW IMAGE */}
-                {s.imageUrl && (
-                  <img
-                    src={`http://13.127.142.221:3001${s.imageUrl}`}
-                    alt={s.name}
-                    style={{ maxWidth: '300px', marginTop: '0.5rem' }}
-                  />
-                )}
-
-                <hr />
-              </div>
-            ))
-          )}
+          {patient.scans.map(s => (
+            <div key={s.id}>
+              <p><b>{s.name}</b> ({s.date})</p>
+              <p>Type: {s.scanType}</p>
+              {s.imageUrl && (
+                <img
+                  src={`http://3.110.120.237:3001${s.imageUrl}`}
+                  alt={s.name}
+                  style={{ maxWidth: '300px' }}
+                />
+              )}
+              <hr />
+            </div>
+          ))}
         </div>
       )}
     </div>
